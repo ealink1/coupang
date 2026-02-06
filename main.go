@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"coupang/config"
 	"coupang/core"
+	"flag"
 	"fmt"
 )
 
@@ -10,10 +12,11 @@ import (
 // the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
 func main() {
 
-	//10	2026-02-04 14:32:09.89015+08	A1580015Y3	cb2ee9a6-c4dc-4dfb-9a70-7d479addaf78	b732e10b84c9b1cd86e9f933ebb20b8bab9cf163	1
+	flag.Parse()
 
-	//client := core.NewCoupangClient("4b66358f-efbc-490c-a7ca-63e7d100f901", "14a02ef7123c8da073672a3e955200eeb10c81fb", "A158000L2X")
-	client := core.NewCoupangClient("cb2ee9a6-c4dc-4dfb-9a70-7d479addaf78", "b732e10b84c9b1cd86e9f933ebb20b8bab9cf163", "A1580015Y3")
+	cfg := config.GetCfg()
+
+	client := core.NewCoupangClient(cfg.Coupang.ApiKey, cfg.Coupang.SecretKey, cfg.Coupang.VendorId)
 	// now := time.Now()
 
 	// from := now.AddDate(0, 0, 0).Format("2006-01-02") + "+08:00"
@@ -104,14 +107,17 @@ func main() {
 	//	fmt.Printf("ShipmentBox Order: %+v\n", _resp)
 	//}
 	//
-	//fmt.Println("------------------")
-	//orderId := "127100001830279"
-	//orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
-	//if err != nil {
-	//	fmt.Println(err.Error())
-	//} else {
-	//	fmt.Printf("Order Details: %+v\n", orderresp)
-	//}
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	orderId := "116100001823735"
+	orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Printf("Order Details: %+v\n", orderresp)
+	}
 
 	// invResp, err := client.GetSellerProductInventories(context.Background(), []int64{1134696112653240})
 	// if err != nil {
@@ -119,18 +125,27 @@ func main() {
 	// } else {
 	// 	fmt.Printf("Inventory Details: %+v\n", invResp)
 	// }
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	for _, datum := range orderresp.Data {
+		for _, item := range datum.OrderItems {
 
-	productResp, err := client.GetSellerProduct(context.Background(), 1134696112653240)
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		//fmt.Printf("Product Details: %+v\n", productResp)
-	}
-	for _, item := range productResp.Data.Items {
-		for _, image := range item.Images {
-			if image.ImageType == "REPRESENTATION" {
-				fmt.Println(image.CdnPath)
+			productResp, _err := client.GetSellerProduct(context.Background(), item.SellerProductId)
+			if _err != nil {
+				fmt.Println(_err.Error())
+			} else {
+				fmt.Printf("Product Details: %+v\n", productResp)
 			}
 		}
+		//for _, item := range productResp.Data.Items {
+		//	for _, image := range item.Images {
+		//		if image.ImageType == "REPRESENTATION" {
+		//			fmt.Println(image.CdnPath)
+		//		}
+		//	}
+		//}
 	}
+
 }

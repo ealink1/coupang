@@ -1,35 +1,127 @@
 package core
 
+import "time"
+
 // Order struct represents the order information from Coupang API
 type Order struct {
-	OrderId       int64  `json:"orderId"`
-	ShipmentBoxId int64  `json:"shipmentBoxId"`
-	OrderedAt     string `json:"orderedAt"`
-	Status        string `json:"status"`
+	ShipmentBoxId int64     `json:"shipmentBoxId"`
+	OrderId       int64     `json:"orderId"`
+	OrderedAt     time.Time `json:"orderedAt"`
 	Orderer       struct {
-		Name          string `json:"name"`
-		Email         string `json:"email"`
-		SafeNumber    string `json:"safeNumber"`
-		OrdererNumber string `json:"ordererNumber"`
+		Name          string      `json:"name"`
+		Email         string      `json:"email"`
+		SafeNumber    string      `json:"safeNumber"`
+		OrdererNumber interface{} `json:"ordererNumber"`
 	} `json:"orderer"`
-	PaidAt        string `json:"paidAt"`
+	PaidAt        time.Time `json:"paidAt"`
+	Status        string    `json:"status"`
 	ShippingPrice struct {
 		CurrencyCode string `json:"currencyCode"`
-		Units        int64  `json:"units"`
-		Nanos        int32  `json:"nanos"`
+		Units        int    `json:"units"`
+		Nanos        int    `json:"nanos"`
 	} `json:"shippingPrice"`
-	Receiver struct {
-		Name     string `json:"name"`
-		Addr1    string `json:"addr1"`
-		Addr2    string `json:"addr2"`
-		PostCode string `json:"postCode"`
+	CodDeliveryFee struct {
+		CurrencyCode string `json:"currencyCode"`
+		Units        int    `json:"units"`
+		Nanos        int    `json:"nanos"`
+	} `json:"codDeliveryFee"`
+	RemotePrice struct {
+		CurrencyCode string `json:"currencyCode"`
+		Units        int    `json:"units"`
+		Nanos        int    `json:"nanos"`
+	} `json:"remotePrice"`
+	RemoteArea         bool   `json:"remoteArea"`
+	ParcelPrintMessage string `json:"parcelPrintMessage"`
+	SplitShipping      bool   `json:"splitShipping"`
+	AbleSplitShipping  bool   `json:"ableSplitShipping"`
+	Receiver           struct {
+		Name           string      `json:"name"`
+		SafeNumber     string      `json:"safeNumber"`
+		ReceiverNumber interface{} `json:"receiverNumber"`
+		Addr1          string      `json:"addr1"`
+		Addr2          string      `json:"addr2"`
+		PostCode       string      `json:"postCode"`
 	} `json:"receiver"`
 	OrderItems []struct {
-		VendorItemName string `json:"vendorItemName"`
-		ProductId      int64  `json:"productId"`
-		VendorItemId   int64  `json:"vendorItemId"`
-		ShippingCount  int    `json:"shippingCount"`
+		VendorItemPackageId   int    `json:"vendorItemPackageId"`
+		VendorItemPackageName string `json:"vendorItemPackageName"`
+		ProductId             int64  `json:"productId"`
+		VendorItemId          int64  `json:"vendorItemId"`
+		VendorItemName        string `json:"vendorItemName"`
+		ShippingCount         int    `json:"shippingCount"`
+		SalesPrice            struct {
+			CurrencyCode string `json:"currencyCode"`
+			Units        int    `json:"units"`
+			Nanos        int    `json:"nanos"`
+		} `json:"salesPrice"`
+		OrderPrice struct {
+			CurrencyCode string `json:"currencyCode"`
+			Units        int    `json:"units"`
+			Nanos        int    `json:"nanos"`
+		} `json:"orderPrice"`
+		DiscountPrice struct {
+			CurrencyCode string `json:"currencyCode"`
+			Units        int    `json:"units"`
+			Nanos        int    `json:"nanos"`
+		} `json:"discountPrice"`
+		InstantCouponDiscount struct {
+			CurrencyCode string `json:"currencyCode"`
+			Units        int    `json:"units"`
+			Nanos        int    `json:"nanos"`
+		} `json:"instantCouponDiscount"`
+		DownloadableCouponDiscount struct {
+			CurrencyCode string `json:"currencyCode"`
+			Units        int    `json:"units"`
+			Nanos        int    `json:"nanos"`
+		} `json:"downloadableCouponDiscount"`
+		CoupangDiscount struct {
+			CurrencyCode string `json:"currencyCode"`
+			Units        int    `json:"units"`
+			Nanos        int    `json:"nanos"`
+		} `json:"coupangDiscount"`
+		ExternalVendorSkuCode      string      `json:"externalVendorSkuCode"`
+		EtcInfoHeader              interface{} `json:"etcInfoHeader"`
+		EtcInfoValue               interface{} `json:"etcInfoValue"`
+		EtcInfoValues              interface{} `json:"etcInfoValues"`
+		SellerProductId            int64       `json:"sellerProductId"`
+		SellerProductName          string      `json:"sellerProductName"`
+		SellerProductItemName      string      `json:"sellerProductItemName"`
+		FirstSellerProductItemName string      `json:"firstSellerProductItemName"`
+		CancelCount                int         `json:"cancelCount"`
+		HoldCountForCancel         int         `json:"holdCountForCancel"`
+		EstimatedShippingDate      string      `json:"estimatedShippingDate"`
+		PlannedShippingDate        string      `json:"plannedShippingDate"`
+		InvoiceNumberUploadDate    interface{} `json:"invoiceNumberUploadDate"`
+		ExtraProperties            struct {
+			M1VARIATIONID   string `json:"M1_VARIATION_ID,omitempty"`
+			M1ORIGINALPRICE string `json:"M1_ORIGINAL_PRICE,omitempty"`
+		} `json:"extraProperties"`
+		PricingBadge           bool        `json:"pricingBadge"`
+		UsedProduct            bool        `json:"usedProduct"`
+		ConfirmDate            interface{} `json:"confirmDate"`
+		DeliveryChargeTypeName string      `json:"deliveryChargeTypeName"`
+		UpBundleVendorItemId   interface{} `json:"upBundleVendorItemId"`
+		UpBundleVendorItemName interface{} `json:"upBundleVendorItemName"`
+		UpBundleSize           interface{} `json:"upBundleSize"`
+		TaxReceiptInfo         interface{} `json:"taxReceiptInfo"`
+		Canceled               bool        `json:"canceled"`
+		UpBundleItem           bool        `json:"upBundleItem"`
 	} `json:"orderItems"`
+	OverseaShippingInfoDto struct {
+		PersonalCustomsClearanceCode string `json:"personalCustomsClearanceCode"`
+		OrdererSsn                   string `json:"ordererSsn"`
+		OrdererPhoneNumber           string `json:"ordererPhoneNumber"`
+	} `json:"overseaShippingInfoDto"`
+	DeliveryCompanyName string      `json:"deliveryCompanyName"`
+	InvoiceNumber       string      `json:"invoiceNumber"`
+	InTrasitDateTime    interface{} `json:"inTrasitDateTime"`
+	DeliveredDate       interface{} `json:"deliveredDate"`
+	Refer               string      `json:"refer"`
+	ShipmentType        string      `json:"shipmentType"`
+	IsCod               bool        `json:"isCod"`
+	ExtraProperties     struct {
+		TaxReceiptInfo string `json:"taxReceiptInfo"`
+	} `json:"extraProperties"`
 }
 
 type OrderListResponse struct {
