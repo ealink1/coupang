@@ -1,0 +1,4 @@
+coupang:
+  api_key: your_api_key
+  secret_key: your_secret_key
+  vendor_id: your_vendor_id
