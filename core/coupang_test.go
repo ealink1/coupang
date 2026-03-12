@@ -2,15 +2,22 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 )
 
 func TestCoupang(t *testing.T) {
+	accessKey := os.Getenv("COUPANG_ACCESS_KEY")
+	secretKey := os.Getenv("COUPANG_SECRET_KEY")
+	vendorID := os.Getenv("COUPANG_VENDOR_ID")
+	if accessKey == "" || secretKey == "" || vendorID == "" {
+		t.Skip("set COUPANG_ACCESS_KEY/COUPANG_SECRET_KEY/COUPANG_VENDOR_ID to run integration test")
+	}
 
-	vendorID := "A158000L2X"
-	client := NewCoupangClient("4b66358f-efbc-490c-a7ca-63e7d100f901", "14a02ef7123c8da073672a3e955200eeb10c81fb", vendorID)
+	client := NewCoupangClient(accessKey, secretKey, vendorID)
 
 	//orderId := "111100001543008"
 	//resp, err := client.GetOrderByOrderId(orderId)
@@ -59,6 +66,172 @@ func TestCoupang(t *testing.T) {
 	//} else {
 	//	fmt.Printf("ShipmentBox Order: %+v\n", resp)
 	//}
+}
+
+func TestReturnShippingCentersResponseUnmarshal(t *testing.T) {
+	raw := `{
+  "code": 200,
+  "message": "SUCCESS",
+  "data": {
+    "content": [
+      {
+        "vendorId": "A00012345",
+        "returnCenterCode": "1000557004",
+        "shippingPlaceName": "32777 R",
+        "deliverCode": "HANJIN",
+        "deliverName": "한진택배",
+        "goodsflowStatus": "승인",
+        "errorMessage": "",
+        "createdAt": 1581195908000,
+        "vendorCreditFee02kg": null,
+        "vendorCreditFee05kg": 3000,
+        "vendorCreditFee10kg": 3000,
+        "vendorCreditFee20kg": 3000,
+        "vendorCashFee02kg": null,
+        "vendorCashFee05kg": 3000,
+        "vendorCashFee10kg": 3000,
+        "vendorCashFee20kg": 3000,
+        "consumerCashFee02kg": null,
+        "consumerCashFee05kg": 3000,
+        "consumerCashFee10kg": 3000,
+        "consumerCashFee20kg": 3000,
+        "returnFee02kg": null,
+        "returnFee05kg": 3000,
+        "returnFee10kg": 3000,
+        "returnFee20kg": 3000,
+        "usable": true,
+        "placeAddresses": [
+          {
+            "addressType": "JIBUN",
+            "countryCode": "KR",
+            "companyContactNumber": "02-111-1111",
+            "phoneNumber2": "000-0000-0000",
+            "returnZipCode": "42701",
+            "returnAddress": "대구시 달서구 성서공단로",
+            "returnAddressDetail": "235"
+          }
+        ]
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 749,
+      "totalElements": 7488,
+      "countPerPage": 10
+    }
+  }
+}`
+
+	var resp ReturnShippingCentersResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	if resp.Code != 200 {
+		t.Fatalf("unexpected code: %d", resp.Code)
+	}
+	if resp.Data.Pagination.CurrentPage != 1 || resp.Data.Pagination.CountPerPage != 10 {
+		t.Fatalf("unexpected pagination: %+v", resp.Data.Pagination)
+	}
+	if len(resp.Data.Content) != 1 {
+		t.Fatalf("unexpected content length: %d", len(resp.Data.Content))
+	}
+	if resp.Data.Content[0].ReturnCenterCode != "1000557004" {
+		t.Fatalf("unexpected returnCenterCode: %s", resp.Data.Content[0].ReturnCenterCode)
+	}
+	if resp.Data.Content[0].VendorCreditFee05kg == nil || *resp.Data.Content[0].VendorCreditFee05kg != 3000 {
+		t.Fatalf("unexpected vendorCreditFee05kg: %v", resp.Data.Content[0].VendorCreditFee05kg)
+	}
+}
+
+func TestArrangeShipmentDirectIntegrationResponseUnmarshal(t *testing.T) {
+	raw := `{
+  "12345": {
+    "success": true,
+    "errorKey": "",
+    "errorMessage": "",
+    "invoiceNumber": "12345556",
+    "shipmentBoxId": 12345,
+    "validationCode": "",
+    "invoiceNumberInvalidTime":"2025-09-02T13:54:39+08:00"
+  }
+}`
+
+	var resp ArrangeShipmentDirectIntegrationResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+}
+
+func TestArrangeShipmentDirectIntegrationValidate(t *testing.T) {
+	client := NewCoupangClient("", "", "A00012345")
+
+	if _, err := client.ArrangeShipmentDirectIntegration(context.Background(), nil); err == nil {
+		t.Fatalf("expected error for empty items")
+	}
+
+	if _, err := client.ArrangeShipmentDirectIntegration(context.Background(), []ArrangeShipmentDirectIntegrationRequestItem{
+		{ShipmentBoxId: 1, DeliveryCompanyCode: "TWL_FM", ReturnCenterCode: "1100047243"},
+		{ShipmentBoxId: 2, DeliveryCompanyCode: "TWL_711", ReturnCenterCode: "1100047243"},
+	}); err == nil {
+		t.Fatalf("expected error for mixed deliveryCompanyCode")
+	}
+
+	if _, err := client.ArrangeShipmentDirectIntegration(context.Background(), []ArrangeShipmentDirectIntegrationRequestItem{
+		{ShipmentBoxId: 1, DeliveryCompanyCode: "TWL_FM"},
+	}); err == nil {
+		t.Fatalf("expected error for missing returnCenterCode")
+	}
+
+	if _, err := client.ArrangeShipmentDirectIntegration(context.Background(), []ArrangeShipmentDirectIntegrationRequestItem{
+		{ShipmentBoxId: 1, DeliveryCompanyCode: "TWL_KERRY"},
+	}); err == nil {
+		t.Fatalf("expected error for missing outboundShippingPlaceCode")
+	}
+}
+
+func TestDownloadDirectIntegrationInvoicesValidate(t *testing.T) {
+	if err := validateDownloadDirectIntegrationInvoicesRequest(nil); err == nil {
+		t.Fatalf("expected error for nil request")
+	}
+
+	if err := validateDownloadDirectIntegrationInvoicesRequest(&DownloadDirectIntegrationInvoicesRequest{}); err == nil {
+		t.Fatalf("expected error for empty request")
+	}
+
+	if err := validateDownloadDirectIntegrationInvoicesRequest(&DownloadDirectIntegrationInvoicesRequest{
+		DeliveryCompanyCode: "TWL_KERRY",
+		InvoicePrintDtoList: nil,
+	}); err == nil {
+		t.Fatalf("expected error for empty invoicePrintDtoList")
+	}
+
+	if err := validateDownloadDirectIntegrationInvoicesRequest(&DownloadDirectIntegrationInvoicesRequest{
+		DeliveryCompanyCode: "TWL_KERRY",
+		InvoicePrintDtoList: []DirectIntegrationInvoice{{ShipmentBoxId: 1, InvoiceNumber: "x"}, {ShipmentBoxId: 2, InvoiceNumber: "x"}, {ShipmentBoxId: 3, InvoiceNumber: "x"}, {ShipmentBoxId: 4, InvoiceNumber: "x"}, {ShipmentBoxId: 5, InvoiceNumber: "x"}, {ShipmentBoxId: 6, InvoiceNumber: "x"}},
+	}); err == nil {
+		t.Fatalf("expected error for kerry size limit")
+	}
+
+	if err := validateDownloadDirectIntegrationInvoicesRequest(&DownloadDirectIntegrationInvoicesRequest{
+		DeliveryCompanyCode: "TWL_FM",
+		InvoicePrintDtoList: []DirectIntegrationInvoice{{ShipmentBoxId: 0, InvoiceNumber: "x"}},
+	}); err == nil {
+		t.Fatalf("expected error for shipmentBoxId")
+	}
+
+	if err := validateDownloadDirectIntegrationInvoicesRequest(&DownloadDirectIntegrationInvoicesRequest{
+		DeliveryCompanyCode: "TWL_711",
+		InvoicePrintDtoList: []DirectIntegrationInvoice{{ShipmentBoxId: 1, InvoiceNumber: ""}},
+	}); err == nil {
+		t.Fatalf("expected error for invoiceNumber")
+	}
+}
+
+func TestParseContentDispositionFilename(t *testing.T) {
+	got := parseContentDispositionFilename(`attachment; filename="7e1beb74-11e9-407c-9775-04696ea3db2f.pdf"`)
+	if got != "7e1beb74-11e9-407c-9775-04696ea3db2f.pdf" {
+		t.Fatalf("unexpected filename: %s", got)
+	}
 }
 
 //func TestCoupangAPIs(t *testing.T) {

@@ -345,3 +345,153 @@ type ProductDetailResponse struct {
 		} `json:"multiReturnInfos"`
 	} `json:"data"`
 }
+
+type GetReturnShippingCentersRequest struct {
+	PageNum  int `json:"pageNum"`
+	PageSize int `json:"pageSize"`
+}
+
+type ReturnShippingCenterAddress struct {
+	AddressType          string `json:"addressType"`
+	CountryCode          string `json:"countryCode"`
+	CompanyContactNumber string `json:"companyContactNumber"`
+	PhoneNumber2         string `json:"phoneNumber2"`
+	ReturnZipCode        string `json:"returnZipCode"`
+	ReturnAddress        string `json:"returnAddress"`
+	ReturnAddressDetail  string `json:"returnAddressDetail"`
+}
+
+type ReturnShippingCenter struct {
+	VendorId            string                        `json:"vendorId"`
+	ReturnCenterCode    string                        `json:"returnCenterCode"`
+	ShippingPlaceName   string                        `json:"shippingPlaceName"`
+	DeliverCode         string                        `json:"deliverCode"`
+	DeliverName         string                        `json:"deliverName"`
+	GoodsflowStatus     string                        `json:"goodsflowStatus"`
+	ErrorMessage        string                        `json:"errorMessage"`
+	CreatedAt           int64                         `json:"createdAt"`
+	VendorCreditFee02kg *int64                        `json:"vendorCreditFee02kg"`
+	VendorCreditFee05kg *int64                        `json:"vendorCreditFee05kg"`
+	VendorCreditFee10kg *int64                        `json:"vendorCreditFee10kg"`
+	VendorCreditFee20kg *int64                        `json:"vendorCreditFee20kg"`
+	VendorCashFee02kg   *int64                        `json:"vendorCashFee02kg"`
+	VendorCashFee05kg   *int64                        `json:"vendorCashFee05kg"`
+	VendorCashFee10kg   *int64                        `json:"vendorCashFee10kg"`
+	VendorCashFee20kg   *int64                        `json:"vendorCashFee20kg"`
+	ConsumerCashFee02kg *int64                        `json:"consumerCashFee02kg"`
+	ConsumerCashFee05kg *int64                        `json:"consumerCashFee05kg"`
+	ConsumerCashFee10kg *int64                        `json:"consumerCashFee10kg"`
+	ConsumerCashFee20kg *int64                        `json:"consumerCashFee20kg"`
+	ReturnFee02kg       *int64                        `json:"returnFee02kg"`
+	ReturnFee05kg       *int64                        `json:"returnFee05kg"`
+	ReturnFee10kg       *int64                        `json:"returnFee10kg"`
+	ReturnFee20kg       *int64                        `json:"returnFee20kg"`
+	Usable              bool                          `json:"usable"`
+	PlaceAddresses      []ReturnShippingCenterAddress `json:"placeAddresses"`
+}
+
+type ReturnShippingCentersPagination struct {
+	CurrentPage   int `json:"currentPage"`
+	TotalPages    int `json:"totalPages"`
+	TotalElements int `json:"totalElements"`
+	CountPerPage  int `json:"countPerPage"`
+}
+
+type ReturnShippingCentersData struct {
+	Content    []ReturnShippingCenter          `json:"content"`
+	Pagination ReturnShippingCentersPagination `json:"pagination"`
+}
+
+type ReturnShippingCentersResponse struct {
+	Code    int                       `json:"code"`
+	Message string                    `json:"message"`
+	Data    ReturnShippingCentersData `json:"data"`
+}
+
+type ArrangeShipmentDirectIntegrationRequestItem struct {
+	ShipmentBoxId             int64  `json:"shipmentBoxId"`
+	DeliveryCompanyCode       string `json:"deliveryCompanyCode"`
+	ReturnCenterCode          string `json:"returnCenterCode,omitempty"`
+	OutboundShippingPlaceCode int64  `json:"outboundShippingPlaceCode,omitempty"`
+	Remark                    string `json:"remark,omitempty"`
+}
+
+type ArrangeShipmentDirectIntegrationResult struct {
+	Success                  bool   `json:"success"`
+	ErrorKey                 string `json:"errorKey"`
+	ErrorMessage             string `json:"errorMessage"`
+	InvoiceNumber            string `json:"invoiceNumber"`
+	ShipmentBoxId            int64  `json:"shipmentBoxId"`
+	ValidationCode           string `json:"validationCode"`
+	InvoiceNumberInvalidTime string `json:"invoiceNumberInvalidTime"`
+}
+
+type ArrangeShipmentDirectIntegrationResponse struct {
+	Code    int                                               `json:"code"`
+	Message string                                            `json:"message"`
+	Data    map[string]ArrangeShipmentDirectIntegrationResult `json:"data"`
+}
+
+type DownloadDirectIntegrationInvoicesRequest struct {
+	DeliveryCompanyCode string                     `json:"deliveryCompanyCode"`
+	InvoicePrintDtoList []DirectIntegrationInvoice `json:"invoicePrintDtoList"`
+}
+
+type DirectIntegrationInvoice struct {
+	ShipmentBoxId int64  `json:"shipmentBoxId"`
+	InvoiceNumber string `json:"invoiceNumber"`
+}
+
+type DownloadDirectIntegrationInvoicesFile struct {
+	ContentType        string
+	ContentDisposition string
+	Filename           string
+	Content            []byte
+}
+
+type GetOutboundShippingPlacesRequest struct {
+	PlaceCodes []int64  `json:"placeCodes"`
+	PlaceNames []string `json:"placeNames"`
+	PageNum    int      `json:"pageNum"`
+	PageSize   int      `json:"pageSize"`
+}
+
+type OutboundShippingPlaceAddress struct {
+	AddressType          string `json:"addressType"`
+	CountryCode          string `json:"countryCode"`
+	CompanyContactNumber string `json:"companyContactNumber"`
+	PhoneNumber2         string `json:"phoneNumber2"`
+	ReturnZipCode        string `json:"returnZipCode"`
+	ReturnAddress        string `json:"returnAddress"`
+	ReturnAddressDetail  string `json:"returnAddressDetail"`
+}
+
+type OutboundShippingPlaceRemoteInfo struct {
+	RemoteInfoId int64  `json:"remoteInfoId"`
+	DeliveryCode string `json:"deliveryCode"`
+	Jeju         int64  `json:"jeju"`
+	JejuFee      int64  `json:"jejuFee"`
+	NotJeju      int64  `json:"notJeju"`
+	Usable       bool   `json:"usable"`
+}
+
+type OutboundShippingPlace struct {
+	OutboundShippingPlaceCode int64                            `json:"outboundShippingPlaceCode"`
+	ShippingPlaceName         string                           `json:"shippingPlaceName"`
+	CreateDate                string                           `json:"createDate"`
+	PlaceAddresses            []OutboundShippingPlaceAddress    `json:"placeAddresses"`
+	RemoteInfos               []OutboundShippingPlaceRemoteInfo `json:"remoteInfos"`
+	Usable                    bool                             `json:"usable"`
+}
+
+type OutboundShippingPlacesPagination struct {
+	CurrentPage   int `json:"currentPage"`
+	TotalPages    int `json:"totalPages"`
+	TotalElements int `json:"totalElements"`
+	CountPerPage  int `json:"countPerPage"`
+}
+
+type OutboundShippingPlacesResponse struct {
+	Content    []OutboundShippingPlace          `json:"content"`
+	Pagination OutboundShippingPlacesPagination `json:"pagination"`
+}

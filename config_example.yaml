@@ -2,3 +2,11 @@ coupang:
   api_key: your_api_key
   secret_key: your_secret_key
   vendor_id: your_vendor_id
+aliyun:
+  access_key_id: "xxxxxxxxxx"
+  access_key_secret: "FKq578YgHl9HFoxxxxxxx"
+  region_id: "cn-hangzhou"
+  oss:
+    endpoint: ""
+    bucket: "xxxxxx"
+    base_path: ""

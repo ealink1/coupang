@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -83,10 +84,40 @@ func (c *CoupangClient) doPostJSON(ctx context.Context, path string, body interf
 		"X-EXTENDED-TIMEOUT": "90000",
 	}
 
+	curlCmd, err := http_call.BuildCurlPostJSON(fullURL, headers, body)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("curlCmd:", curlCmd)
+
 	respBytes, err := http_call.HttpPost(fullURL, body, http_call.ContentTypeJSON, headers)
 	if err != nil {
 		return "", err
 	}
 
 	return string(respBytes), nil
+}
+
+func (c *CoupangClient) doPostJSONWithHeaders(ctx context.Context, path string, body interface{}) (int, http.Header, []byte, error) {
+	query := ""
+	fullURL := fmt.Sprintf("%s://%s%s", Schema, Host, path)
+	fmt.Println("fullURL:", fullURL)
+
+	authHeader := c.generateHMAC("POST", path, query)
+
+	headers := map[string]string{
+		"Authorization":      authHeader,
+		"Content-Type":       http_call.ContentTypeJSON,
+		"X-Requested-By":     c.VendorID,
+		"X-MARKET":           "TW",
+		"X-EXTENDED-TIMEOUT": "90000",
+	}
+
+	curlCmd, err := http_call.BuildCurlPostJSON(fullURL, headers, body)
+	if err != nil {
+		return 0, nil, nil, err
+	}
+	fmt.Println("curlCmd:", curlCmd)
+
+	return http_call.HttpPostWithHeaders(fullURL, body, http_call.ContentTypeJSON, headers)
 }
