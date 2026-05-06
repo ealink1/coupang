@@ -90,7 +90,13 @@ func (c *CoupangClient) GetOrderByShipmentBoxId(ctx context.Context, shipmentBox
 	return &resp, err
 }
 
-// GetOrderByOrderId queries single order by orderId
+// GetOrderByOrderId 通过订单号查询单个订单
+// 路径：GET /v2/providers/openapi/apis/api/v5/vendors/{vendorId}/{orderId}/ordersheets
+// 注意：
+//  1. 由于 CGF 订单不会透过 Open API 返回，请不要使用 CGF 订单号码来请求
+//  2. 顾客可在付款完成后修改收货地址，因此在将商品状态处理为"商品准备中"后，
+//     请务必透过单件订单查询来确认是否修改或更新了配送地资讯 (receiver)
+//  3. 发货前，请一定要确认 "sellerProductName + sellerProductItemName" 和 "vendorItemName" 上的资讯是否一致
 func (c *CoupangClient) GetOrderByOrderId(ctx context.Context, orderId string) (*SingleOrderListResponse, error) {
 	path := fmt.Sprintf("/v2/providers/openapi/apis/api/v5/vendors/%s/%s/ordersheets", c.VendorID, orderId)
 	params := url.Values{}
@@ -199,7 +205,7 @@ func validateDownloadDirectIntegrationInvoicesRequest(req *DownloadDirectIntegra
 
 	limit := 0
 	switch req.DeliveryCompanyCode {
-	case "TWL_KERRY":
+	case "TWL_KERRY", "TWL_HCT":
 		limit = 5
 	case "TWL_FM":
 		limit = 30

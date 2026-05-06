@@ -38,6 +38,7 @@ func GetCfg() *Config {
 
 type Config struct {
 	Coupang CoupangConfig `yaml:"coupang"`
+	OrderId string        `yaml:"order_id"`
 }
 
 type CoupangConfig struct {

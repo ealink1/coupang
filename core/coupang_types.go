@@ -138,7 +138,7 @@ type SingleOrderResponse struct {
 }
 
 type SingleOrderListResponse struct {
-	Code    int     `json:"code"`
+	Code    any     `json:"code"`
 	Message string  `json:"message"`
 	Data    []Order `json:"data"`
 }
@@ -476,12 +476,12 @@ type OutboundShippingPlaceRemoteInfo struct {
 }
 
 type OutboundShippingPlace struct {
-	OutboundShippingPlaceCode int64                            `json:"outboundShippingPlaceCode"`
-	ShippingPlaceName         string                           `json:"shippingPlaceName"`
-	CreateDate                string                           `json:"createDate"`
+	OutboundShippingPlaceCode int64                             `json:"outboundShippingPlaceCode"`
+	ShippingPlaceName         string                            `json:"shippingPlaceName"`
+	CreateDate                string                            `json:"createDate"`
 	PlaceAddresses            []OutboundShippingPlaceAddress    `json:"placeAddresses"`
 	RemoteInfos               []OutboundShippingPlaceRemoteInfo `json:"remoteInfos"`
-	Usable                    bool                             `json:"usable"`
+	Usable                    bool                              `json:"usable"`
 }
 
 type OutboundShippingPlacesPagination struct {

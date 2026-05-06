@@ -4,6 +4,7 @@ import (
 	"context"
 	"coupang/config"
 	"coupang/core"
+	"encoding/json"
 	"flag"
 	"fmt"
 )
@@ -107,17 +108,17 @@ func main() {
 	//	fmt.Printf("ShipmentBox Order: %+v\n", _resp)
 	//}
 
-	// fmt.Println("------------------")
-	// fmt.Println("------------------")
-	// fmt.Println("------------------")
-	// fmt.Println("------------------")
-	// orderId := "8089769166"
-	// orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// } else {
-	// 	fmt.Printf("Order Details: %+v\n", orderresp)
-	// }
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	fmt.Println("------------------")
+	orderId := cfg.OrderId
+	orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Printf("Order Details: %+v\n", orderresp)
+	}
 
 	//fmt.Println("------------------")
 	//fmt.Println("------------------")
@@ -133,37 +134,37 @@ func main() {
 	//	fmt.Printf("Order Details: %+v\n", orderresp)
 	//}
 
-	fmt.Println("------------------")
-	fmt.Println("------------------")
-	fmt.Println("------------------")
-	fmt.Println("------------------")
-	orderresp, err := client.ArrangeShipmentDirectIntegration(context.Background(), []core.ArrangeShipmentDirectIntegrationRequestItem{
-		//{
-		//	ShipmentBoxId:       661725267329026,
-		//	DeliveryCompanyCode: "TWL_711",
-		//	ReturnCenterCode:    "1002359671",
-		//},
-		{
-			ShipmentBoxId:       663859534741504,
-			DeliveryCompanyCode: "TWL_FM",
-			ReturnCenterCode:    "1002431063",
-		},
-		{
-			ShipmentBoxId:       662556762865664,
-			DeliveryCompanyCode: "TWL_FM",
-			ReturnCenterCode:    "1002431063",
-		},
-		//{
-		//	ShipmentBoxId:             663836294021120,
-		//	DeliveryCompanyCode:       "TWL_KERRY",
-		//	OutboundShippingPlaceCode: 23556341,
-		//},
-	})
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		fmt.Printf("Order Details: %+v\n", orderresp)
-	}
+	//fmt.Println("------------------")
+	//fmt.Println("------------------")
+	//fmt.Println("------------------")
+	//fmt.Println("------------------")
+	//orderresp, err := client.ArrangeShipmentDirectIntegration(context.Background(), []core.ArrangeShipmentDirectIntegrationRequestItem{
+	//	//{
+	//	//	ShipmentBoxId:       661725267329026,
+	//	//	DeliveryCompanyCode: "TWL_711",
+	//	//	ReturnCenterCode:    "1002359671",
+	//	//},
+	//	{
+	//		ShipmentBoxId:       663859534741504,
+	//		DeliveryCompanyCode: "TWL_FM",
+	//		ReturnCenterCode:    "1002431063",
+	//	},
+	//	{
+	//		ShipmentBoxId:       662556762865664,
+	//		DeliveryCompanyCode: "TWL_FM",
+	//		ReturnCenterCode:    "1002431063",
+	//	},
+	//	//{
+	//	//	ShipmentBoxId:             663836294021120,
+	//	//	DeliveryCompanyCode:       "TWL_KERRY",
+	//	//	OutboundShippingPlaceCode: 23556341,
+	//	//},
+	//})
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//} else {
+	//	fmt.Printf("Order Details: %+v\n", orderresp)
+	//}
 
 	// fmt.Println("------------------")
 	// fmt.Println("------------------")
@@ -228,21 +229,21 @@ func main() {
 	//	//}
 	//}
 
-	//invoices, err := client.DownloadDirectIntegrationInvoices(context.Background(), &core.DownloadDirectIntegrationInvoicesRequest{
-	//	DeliveryCompanyCode: "TWL_KERRY",
-	//	InvoicePrintDtoList: []core.DirectIntegrationInvoice{
-	//		{
-	//			InvoiceNumber: "40529136745",
-	//			ShipmentBoxId: 663883689672705,
-	//		},
-	//	},
-	//})
-	//
-	//if err != nil {
-	//	fmt.Println(err.Error())
-	//}
-	//marshal, _ := json.Marshal(invoices)
-	//fmt.Println(string(marshal))
+	invoices, err := client.DownloadDirectIntegrationInvoices(context.Background(), &core.DownloadDirectIntegrationInvoicesRequest{
+		DeliveryCompanyCode: "TWL_HCT",
+		InvoicePrintDtoList: []core.DirectIntegrationInvoice{
+			{
+				InvoiceNumber: "1836803894",
+				ShipmentBoxId: 681608923234304,
+			},
+		},
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	marshal, _ := json.Marshal(invoices)
+	fmt.Println(string(marshal))
 
 	//fmt.Println("------------------")
 	//fmt.Println("------------------")
