@@ -23,8 +23,8 @@ func main() {
 	//from := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, -4).Format("2006-01-02")) // 不能有空格
 	//to := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, 0).Format("2006-01-02"))
 
-	// //from := ""
-	// //to := ""
+	//from := ""
+	//to := ""
 
 	//fmt.Println("-----------------")
 	//fmt.Println("-----------------")
@@ -108,17 +108,17 @@ func main() {
 	//	fmt.Printf("ShipmentBox Order: %+v\n", _resp)
 	//}
 
-	fmt.Println("------------------")
-	fmt.Println("------------------")
-	fmt.Println("------------------")
-	fmt.Println("------------------")
-	orderId := cfg.OrderId
-	orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		fmt.Printf("Order Details: %+v\n", orderresp)
-	}
+	//fmt.Println("------------------")
+	//fmt.Println("------------------")
+	//fmt.Println("------------------")
+	//fmt.Println("------------------")
+	//orderId := cfg.OrderId
+	//orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//} else {
+	//	fmt.Printf("Order Details: %+v\n", orderresp)
+	//}
 
 	//fmt.Println("------------------")
 	//fmt.Println("------------------")
@@ -230,11 +230,11 @@ func main() {
 	//}
 
 	invoices, err := client.DownloadDirectIntegrationInvoices(context.Background(), &core.DownloadDirectIntegrationInvoicesRequest{
-		DeliveryCompanyCode: "TWL_HCT",
+		DeliveryCompanyCode: "TWL_FM",
 		InvoicePrintDtoList: []core.DirectIntegrationInvoice{
 			{
-				InvoiceNumber: "1836803894",
-				ShipmentBoxId: 681608923234304,
+				InvoiceNumber: "16341449800",
+				ShipmentBoxId: 695871121358848,
 			},
 		},
 	})
