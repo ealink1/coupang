@@ -12,7 +12,11 @@ import (
 
 const (
 	Schema = "https"
-	Host   = "api-gateway.coupang.com"
+	Host   = "cn.connkey.com/coupang"
+	//Host                       = "api-gateway.coupang.com"
+	marketKorea                = "KR"
+	marketTaiwan               = "TW"
+	categoryRecommendationPath = "/v2/providers/openapi/apis/api/v1/categorization/predict"
 )
 
 type CoupangClient struct {
@@ -27,6 +31,44 @@ func NewCoupangClient(accessKey, secretKey, vendorID string) *CoupangClient {
 		SecretKey: secretKey,
 		VendorID:  vendorID,
 	}
+}
+
+func validateCategoryRecommendationRequest(req *CategoryRecommendationRequest) error {
+	if req == nil {
+		return fmt.Errorf("request is required")
+	}
+	if strings.TrimSpace(req.ProductName) == "" {
+		return fmt.Errorf("productName is required")
+	}
+	return nil
+}
+
+// RecommendCategory recommends the Korean Coupang display category that best
+// matches the supplied product information.
+func (c *CoupangClient) RecommendCategory(ctx context.Context, req *CategoryRecommendationRequest) (*CategoryRecommendationResponse, error) {
+	if err := validateCategoryRecommendationRequest(req); err != nil {
+		return nil, err
+	}
+
+	statusCode, _, body, err := c.doPostJSONWithHeadersForMarket(ctx, categoryRecommendationPath, req, marketKorea)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(string(body))
+	if statusCode < 200 || statusCode >= 300 {
+		var apiResp CategoryRecommendationResponse
+		if err := json.Unmarshal(body, &apiResp); err == nil && apiResp.Message != "" {
+			return nil, fmt.Errorf("category recommendation failed with status %d: %s", statusCode, apiResp.Message)
+		}
+		return nil, fmt.Errorf("category recommendation failed with status %d", statusCode)
+	}
+
+	var resp CategoryRecommendationResponse
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 // GetOrderListDaily queries order list by day

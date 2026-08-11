@@ -4,10 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
 
 func TestCoupang(t *testing.T) {
 	accessKey := os.Getenv("COUPANG_ACCESS_KEY")
@@ -66,6 +75,137 @@ func TestCoupang(t *testing.T) {
 	//} else {
 	//	fmt.Printf("ShipmentBox Order: %+v\n", resp)
 	//}
+}
+
+func TestRecommendCategory(t *testing.T) {
+	originalTransport := http.DefaultTransport
+	http.DefaultTransport = roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		if req.Method != http.MethodPost {
+			t.Fatalf("unexpected method: %s", req.Method)
+		}
+		if req.URL.Path != categoryRecommendationPath {
+			t.Fatalf("unexpected path: %s", req.URL.Path)
+		}
+		if got := req.Header.Get("X-MARKET"); got != marketKorea {
+			t.Fatalf("unexpected X-MARKET: %s", got)
+		}
+		if got := req.Header.Get("X-Requested-By"); got != "A00012345" {
+			t.Fatalf("unexpected X-Requested-By: %s", got)
+		}
+		if got := req.Header.Get("Authorization"); !strings.Contains(got, "access-key=access-key") {
+			t.Fatalf("unexpected Authorization header: %s", got)
+		}
+
+		var body CategoryRecommendationRequest
+		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		if body.ProductName != "코데즈컴바인 양트임싱글코트" {
+			t.Fatalf("unexpected productName: %s", body.ProductName)
+		}
+		if body.Attributes["색상"] != "베이지,네이비" {
+			t.Fatalf("unexpected attributes: %+v", body.Attributes)
+		}
+
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body: io.NopCloser(strings.NewReader(`{
+  "code": 200,
+  "message": "OK",
+  "data": {
+    "autoCategorizationPredictionResultType": "SUCCESS",
+    "predictedCategoryId": "63950",
+    "predictedCategoryName": "일반 섬유유연제",
+    "comment": null
+  }
+}`)),
+			Request: req,
+		}, nil
+	})
+	t.Cleanup(func() {
+		http.DefaultTransport = originalTransport
+	})
+
+	client := NewCoupangClient("access-key", "secret-key", "A00012345")
+	resp, err := client.RecommendCategory(context.Background(), &CategoryRecommendationRequest{
+		ProductName:        "코데즈컴바인 양트임싱글코트",
+		ProductDescription: "캐주얼 싱글코트",
+		Brand:              "코데즈컴바인",
+		Attributes: map[string]string{
+			"색상": "베이지,네이비",
+		},
+		SellerSKUCode: "123123",
+	})
+	if err != nil {
+		t.Fatalf("RecommendCategory failed: %v", err)
+	}
+	if resp.Code != http.StatusOK || resp.Data == nil {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+	if resp.Data.ResultType != CategoryRecommendationSuccess {
+		t.Fatalf("unexpected result type: %s", resp.Data.ResultType)
+	}
+	if resp.Data.PredictedCategoryID != "63950" {
+		t.Fatalf("unexpected predicted category ID: %s", resp.Data.PredictedCategoryID)
+	}
+	if resp.Data.Comment != nil {
+		t.Fatalf("unexpected comment: %v", resp.Data.Comment)
+	}
+}
+
+func TestRecommendCategoryValidate(t *testing.T) {
+	client := NewCoupangClient("", "", "")
+	tests := []struct {
+		name string
+		req  *CategoryRecommendationRequest
+	}{
+		{name: "nil request", req: nil},
+		{name: "empty product name", req: &CategoryRecommendationRequest{}},
+		{name: "blank product name", req: &CategoryRecommendationRequest{ProductName: "  \t"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := client.RecommendCategory(context.Background(), tt.req); err == nil {
+				t.Fatal("expected validation error")
+			}
+		})
+	}
+}
+
+func TestRecommendCategoryHTTPError(t *testing.T) {
+	originalTransport := http.DefaultTransport
+	http.DefaultTransport = roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(`{"code":400,"message":"Input product name should not be empty!"}`)),
+			Request:    req,
+		}, nil
+	})
+	t.Cleanup(func() {
+		http.DefaultTransport = originalTransport
+	})
+
+	client := NewCoupangClient("access-key", "secret-key", "A00012345")
+	_, err := client.RecommendCategory(context.Background(), &CategoryRecommendationRequest{ProductName: "product"})
+	if err == nil {
+		t.Fatal("expected HTTP error")
+	}
+	if !strings.Contains(err.Error(), "Input product name should not be empty!") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestCategoryRecommendationRequestOmitsOptionalFields(t *testing.T) {
+	body, err := json.Marshal(CategoryRecommendationRequest{ProductName: "product"})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	if got, want := string(body), `{"productName":"product"}`; got != want {
+		t.Fatalf("unexpected request JSON: %s", got)
+	}
 }
 
 func TestReturnShippingCentersResponseUnmarshal(t *testing.T) {

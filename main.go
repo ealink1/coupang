@@ -4,7 +4,6 @@ import (
 	"context"
 	"coupang/config"
 	"coupang/core"
-	"encoding/json"
 	"flag"
 	"fmt"
 )
@@ -18,6 +17,19 @@ func main() {
 	cfg := config.GetCfg()
 
 	client := core.NewCoupangClient(cfg.Coupang.ApiKey, cfg.Coupang.SecretKey, cfg.Coupang.VendorId)
+
+	category, err2 := client.RecommendCategory(context.TODO(), &core.CategoryRecommendationRequest{
+		ProductName:        "💕限時免運💕棉護頸椎護脖小圍脖男女空調房防寒護頸帶保暖脖子月子脖套神器新",
+		ProductDescription: "",
+		Brand:              "",
+		Attributes:         nil,
+		SellerSKUCode:      "",
+	})
+	if err2 != nil {
+		fmt.Println(err2)
+	}
+	fmt.Println(category)
+
 	//now := time.Now()
 
 	//from := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, -4).Format("2006-01-02")) // 不能有空格
@@ -229,21 +241,21 @@ func main() {
 	//	//}
 	//}
 
-	invoices, err := client.DownloadDirectIntegrationInvoices(context.Background(), &core.DownloadDirectIntegrationInvoicesRequest{
-		DeliveryCompanyCode: "TWL_FM",
-		InvoicePrintDtoList: []core.DirectIntegrationInvoice{
-			{
-				InvoiceNumber: "16341449800",
-				ShipmentBoxId: 695871121358848,
-			},
-		},
-	})
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	marshal, _ := json.Marshal(invoices)
-	fmt.Println(string(marshal))
+	//invoices, err := client.DownloadDirectIntegrationInvoices(context.Background(), &core.DownloadDirectIntegrationInvoicesRequest{
+	//	DeliveryCompanyCode: "TWL_FM",
+	//	InvoicePrintDtoList: []core.DirectIntegrationInvoice{
+	//		{
+	//			InvoiceNumber: "16341449800",
+	//			ShipmentBoxId: 695871121358848,
+	//		},
+	//	},
+	//})
+	//
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//}
+	//marshal, _ := json.Marshal(invoices)
+	//fmt.Println(string(marshal))
 
 	//fmt.Println("------------------")
 	//fmt.Println("------------------")

@@ -152,6 +152,35 @@ type GetOrderListRequest struct {
 	SearchType    string `json:"searchType"`
 }
 
+type CategoryRecommendationRequest struct {
+	ProductName        string            `json:"productName"`
+	ProductDescription string            `json:"productDescription,omitempty"`
+	Brand              string            `json:"brand,omitempty"`
+	Attributes         map[string]string `json:"attributes,omitempty"`
+	SellerSKUCode      string            `json:"sellerSkuCode,omitempty"`
+}
+
+type CategoryRecommendationResultType string
+
+const (
+	CategoryRecommendationSuccess                 CategoryRecommendationResultType = "SUCCESS"
+	CategoryRecommendationFailure                 CategoryRecommendationResultType = "FAILURE"
+	CategoryRecommendationInsufficientInformation CategoryRecommendationResultType = "INSUFFICIENT_INFORMATION"
+)
+
+type CategoryRecommendationData struct {
+	ResultType            CategoryRecommendationResultType `json:"autoCategorizationPredictionResultType"`
+	Comment               *string                          `json:"comment"`
+	PredictedCategoryID   string                           `json:"predictedCategoryId"`
+	PredictedCategoryName string                           `json:"predictedCategoryName"`
+}
+
+type CategoryRecommendationResponse struct {
+	Code    int                         `json:"code"`
+	Message string                      `json:"message"`
+	Data    *CategoryRecommendationData `json:"data"`
+}
+
 type InventoryItem struct {
 	SellerProductItemId int64  `json:"sellerProductItemId"`
 	VendorItemId        int64  `json:"vendorItemId"`

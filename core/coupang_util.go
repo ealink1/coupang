@@ -54,7 +54,7 @@ func (c *CoupangClient) doRequest(ctx context.Context, method, path string, quer
 		"Authorization":      authHeader,
 		"Content-Type":       "application/json",
 		"X-Requested-By":     c.VendorID,
-		"X-MARKET":           "TW",
+		"X-MARKET":           marketTaiwan,
 		"X-EXTENDED-TIMEOUT": "90000",
 	}
 
@@ -70,6 +70,10 @@ func (c *CoupangClient) doRequest(ctx context.Context, method, path string, quer
 }
 
 func (c *CoupangClient) doPostJSON(ctx context.Context, path string, body interface{}) (string, error) {
+	return c.doPostJSONForMarket(ctx, path, body, marketTaiwan)
+}
+
+func (c *CoupangClient) doPostJSONForMarket(ctx context.Context, path string, body interface{}, market string) (string, error) {
 	query := ""
 	fullURL := fmt.Sprintf("%s://%s%s", Schema, Host, path)
 	fmt.Println("fullURL:", fullURL)
@@ -80,7 +84,7 @@ func (c *CoupangClient) doPostJSON(ctx context.Context, path string, body interf
 		"Authorization":      authHeader,
 		"Content-Type":       http_call.ContentTypeJSON,
 		"X-Requested-By":     c.VendorID,
-		"X-MARKET":           "TW",
+		"X-MARKET":           market,
 		"X-EXTENDED-TIMEOUT": "90000",
 	}
 
@@ -99,6 +103,10 @@ func (c *CoupangClient) doPostJSON(ctx context.Context, path string, body interf
 }
 
 func (c *CoupangClient) doPostJSONWithHeaders(ctx context.Context, path string, body interface{}) (int, http.Header, []byte, error) {
+	return c.doPostJSONWithHeadersForMarket(ctx, path, body, marketTaiwan)
+}
+
+func (c *CoupangClient) doPostJSONWithHeadersForMarket(ctx context.Context, path string, body interface{}, market string) (int, http.Header, []byte, error) {
 	query := ""
 	fullURL := fmt.Sprintf("%s://%s%s", Schema, Host, path)
 	fmt.Println("fullURL:", fullURL)
@@ -109,7 +117,7 @@ func (c *CoupangClient) doPostJSONWithHeaders(ctx context.Context, path string, 
 		"Authorization":      authHeader,
 		"Content-Type":       http_call.ContentTypeJSON,
 		"X-Requested-By":     c.VendorID,
-		"X-MARKET":           "TW",
+		"X-MARKET":           market,
 		"X-EXTENDED-TIMEOUT": "90000",
 	}
 
