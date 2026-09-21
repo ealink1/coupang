@@ -20,6 +20,13 @@ type ReturnRequestListResponse struct {
 	NextToken string          `json:"nextToken,omitempty"`
 }
 
+// SingleReturnRequestResponse 单件退货查询的 code 为字符串，data 仍为数组。
+type SingleReturnRequestResponse struct {
+	Code    string          `json:"code"`
+	Message string          `json:"message"`
+	Data    []ReturnRequest `json:"data"`
+}
+
 type ReturnRequest struct {
 	ReceiptId                int64                `json:"receiptId"`
 	OrderId                  int64                `json:"orderId"`

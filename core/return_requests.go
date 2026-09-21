@@ -103,3 +103,28 @@ func (c *CoupangClient) GetReturnRequestList(ctx context.Context, req *GetReturn
 	}
 	return &resp, nil
 }
+
+// GetReturnRequestByReceiptId 通过退货受理编号查询单件退货，不支持取消编号。
+// receiptId 可从 GetReturnRequestList 返回的退货记录中获取。
+// https://developers.coupang.com/zh-TW/api/returns/query-one-return-request
+func (c *CoupangClient) GetReturnRequestByReceiptId(ctx context.Context, receiptId int64) (*SingleReturnRequestResponse, error) {
+	if receiptId <= 0 {
+		return nil, fmt.Errorf("receiptId must be > 0")
+	}
+	if strings.TrimSpace(c.VendorID) == "" {
+		return nil, fmt.Errorf("vendorId is required")
+	}
+	path := fmt.Sprintf("/v2/providers/openapi/apis/api/v6/vendors/%s/returnRequests/%d", c.VendorID, receiptId)
+	body, err := c.doRequest(ctx, http.MethodGet, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	var resp SingleReturnRequestResponse
+	if err := json.Unmarshal([]byte(body), &resp); err != nil {
+		return nil, fmt.Errorf("decode single return request: %w", err)
+	}
+	if resp.Code != "200" {
+		return nil, fmt.Errorf("single return request failed with code %s: %s", resp.Code, resp.Message)
+	}
+	return &resp, nil
+}
