@@ -145,7 +145,8 @@ func (c *CoupangClient) GetOrderByOrderId(ctx context.Context, orderId string) (
 
 	var resp SingleOrderListResponse
 	respStr, err := c.doRequest(ctx, "GET", path, params)
-	log.Println(respStr)
+	fmt.Printf(respStr)
+	fmt.Println()
 	err = json.Unmarshal([]byte(respStr), &resp)
 	if err != nil {
 		return nil, err

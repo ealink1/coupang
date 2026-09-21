@@ -6,6 +6,7 @@ import (
 	"coupang/core"
 	"flag"
 	"fmt"
+	"time"
 )
 
 // TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
@@ -18,22 +19,29 @@ func main() {
 
 	client := core.NewCoupangClient(cfg.Coupang.ApiKey, cfg.Coupang.SecretKey, cfg.Coupang.VendorId)
 
-	category, err2 := client.RecommendCategory(context.TODO(), &core.CategoryRecommendationRequest{
-		ProductName:        "💕限時免運💕棉護頸椎護脖小圍脖男女空調房防寒護頸帶保暖脖子月子脖套神器新",
-		ProductDescription: "",
-		Brand:              "",
-		Attributes:         nil,
-		SellerSKUCode:      "",
-	})
-	if err2 != nil {
-		fmt.Println(err2)
-	}
-	fmt.Println(category)
+	//productResp, _err := client.GetSellerProduct(context.Background(), 644189389701148)
+	//if _err != nil {
+	//	fmt.Println(_err.Error())
+	//} else {
+	//	fmt.Printf("Product Details: %+v\n", productResp)
+	//}
 
-	//now := time.Now()
+	//category, err2 := client.RecommendCategory(context.TODO(), &core.CategoryRecommendationRequest{
+	//	ProductName:        "💕限時免運💕棉護頸椎護脖小圍脖男女空調房防寒護頸帶保暖脖子月子脖套神器新",
+	//	ProductDescription: "",
+	//	Brand:              "",
+	//	Attributes:         nil,
+	//	SellerSKUCode:      "",
+	//})
+	//if err2 != nil {
+	//	fmt.Println(err2)
+	//}
+	//fmt.Println(category)
 
-	//from := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, -4).Format("2006-01-02")) // 不能有空格
-	//to := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, 0).Format("2006-01-02"))
+	now := time.Now()
+
+	from := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, -9).Format("2006-01-02")) // 不能有空格
+	to := fmt.Sprintf("%s+08:00", now.AddDate(0, 0, 0).Format("2006-01-02"))
 
 	//from := ""
 	//to := ""
@@ -102,13 +110,29 @@ func main() {
 	// }
 
 	// fmt.Println("-------NONE_TRACKING-----------")
-	// req.Status = "NONE_TRACKING"
-	// resp, err = client.GetOrderListDaily(context.Background(), req)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// } else {
-	// 	fmt.Printf("Daily Orders: %+v\n", resp)
-	// }
+	//req.Status = "FINAL_DELIVERY"
+	//resp, err := client.GetOrderListDaily(context.Background(), req)
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//} else {
+	//	fmt.Printf("Daily Orders: %+v\n", resp)
+	//}
+	rtReq := &core.GetReturnRequestListRequest{
+		SearchType:    "",
+		CreatedAtFrom: from,
+		CreatedAtTo:   to,
+		Status:        "",
+		CancelType:    "CANCEL",
+		NextToken:     "2",
+		MaxPerPage:    50,
+		OrderId:       0,
+	}
+	resp, err := client.GetReturnRequestList(context.Background(), rtReq)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Printf("Daily Orders: %+v\n", resp)
+	}
 
 	//fmt.Println("------------------")
 	//
@@ -125,10 +149,11 @@ func main() {
 	//fmt.Println("------------------")
 	//fmt.Println("------------------")
 	//orderId := cfg.OrderId
-	//orderresp, err := client.GetOrderByOrderId(context.Background(), orderId)
+	//orderresp, err := client.GetOrderByOrderId(context.Background(), "118102933917123")
 	//if err != nil {
 	//	fmt.Println(err.Error())
 	//} else {
+	//	fmt.Println()
 	//	fmt.Printf("Order Details: %+v\n", orderresp)
 	//}
 
